@@ -1,0 +1,266 @@
+<?xml version='1.0'?>
+<config
+	xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+	xsi:noNamespaceSchemaLocation='urn:magento:framework:ObjectManager/etc/config.xsd'
+>
+<!-- 2021-10-03
+"The backtrace is not logged for «no class registered for scheme» errors": https://github.com/mage2pro/core/issues/160 -->
+	<type name='Magento\Framework\AppInterface'>
+		<plugin name='Df\Framework\Plugin\AppInterface' type='Df\Framework\Plugin\AppInterface'/>
+	</type>
+<!-- 2017-08-06 The puprose of this plugin is to identify all the pages with our payment information block. -->
+	<type name='Magento\Framework\App\Action\AbstractAction'>
+		<plugin name='Df\Framework\Plugin\App\Action\AbstractAction' type='Df\Framework\Plugin\App\Action\AbstractAction'/>
+	</type>
+<!-- 2021-09-16
+"Implement an ability to temporary ban visitors with a particular IP address": https://github.com/mage2pro/core/issues/159 -->
+	<type name='Magento\Framework\App\Http'>
+		<plugin name='Df\Framework\Plugin\App\Http' type='Df\Framework\Plugin\App\Http'/>
+	</type>
+<!--
+2018-12-17
+It is needed for Yandex.Checkout: it sends a callback via POST,
+but Magento 2.3 enforces a CSRF checking for such requests:
+@see \Magento\Framework\App\Request\CsrfValidator::validateRequest()
+A similar issue with Adyen: https://github.com/Adyen/adyen-magento2/issues/327
+2020-02-25
+1) Now I need it for Sift too.
+"Implement decision webhooks": https://github.com/mage2pro/sift/issues/12
+2) My previous solution was a plugin for `Magento\Framework\Data\Form\FormKey\Validator`:
+	<type name='Magento\Framework\Data\Form\FormKey\Validator'>
+		<plugin
+			name='Df\Framework\Plugin\Data\Form\FormKey\Validator'
+			type='Df\Framework\Plugin\Data\Form\FormKey\Validator'
+		/>
+	</type>
+https://github.com/mage2pro/core/blob/6.2.7/Framework/etc/di.xml#L82-L92
+namespace Df\Framework\Plugin\Data\Form\FormKey;
+use Magento\Framework\App\RequestInterface as IR;
+use Magento\Framework\App\Request\Http as R;
+use Magento\Framework\Data\Form\FormKey\Validator as Sb;
+final class Validator {
+	function aroundValidate(Sb $sb, \Closure $f, IR $r) {return
+		df_starts_with($r->getModuleName(), ['dfe-', 'df-']) || $f($r)
+	;}
+}
+https://github.com/mage2pro/core/blob/6.2.7/Framework/Plugin/Data/Form/FormKey/Validator.php#L9-L25
+It worked only with routes started with `df-` or `dfe-`.
+The Sift's route does not have such prefix (it starts with `sift`), that is why I implemented another solution. -->
+	<type name='Magento\Framework\App\Request\CsrfValidator'>
+		<plugin name='Df\Framework\Plugin\App\Request\CsrfValidator' type='Df\Framework\Plugin\App\Request\CsrfValidator'/>
+	</type>
+<!-- 2020-02-16
+1) "Prevent Magento from logging «cache_invalidate» records to `debug.log`":
+https://github.com/tradefurniturecompany/site/issues/43
+2) The following declaration does not work at least in Magento 2.3.2
+because `Magento\Framework\App\Cache\Frontend\Factory` is initialized before third-party modules:
+	<type name='Magento\Framework\App\Cache\Frontend\Factory'>
+		<arguments>
+			<argument name='decorators' xsi:type='array'>
+				<item name='logger' xsi:type='array'>
+					<item name='class' xsi:type='string'>Df\Framework\Cache\Frontend\Decorator\Logger</item>
+				</item>
+			</argument>
+		</arguments>
+	</type>	-->
+<!-- 2020-11-22 -->
+	<type name='Magento\Framework\App\ResourceConnection'>
+		<plugin name='Df\Framework\Plugin\App\ResourceConnection' type='Df\Framework\Plugin\App\ResourceConnection'/>
+	</type>
+<!-- 2015-12-07
+Цель плагина — поддержка события «df_controller_front_send_response_after».
+*) "Incosistency: the event «controller_front_send_response_after» is removed from Magento 2, but the event «controller_front_send_response_before» is left": https://mage2.pro/t/288
+*) "\Magento\Persistent\Observer\SynchronizePersistentInfoObserver is subscribed on the absent event
+«controller_front_send_response_after», and so it is never called": https://mage2.pro/t/287 -->
+	<type name='Magento\Framework\App\ResponseInterface'>
+		<plugin name='Df\Framework\Plugin\App\ResponseInterface' type='Df\Framework\Plugin\App\ResponseInterface'/>
+	</type>
+<!-- 2017-03-19 Позволяет использовать virtualType для контроллеров. -->
+	<type name='Magento\Framework\App\Router\ActionList'>
+		<plugin name='Df\Framework\Plugin\App\Router\ActionList' type='Df\Framework\Plugin\App\Router\ActionList'/>
+	</type>
+<!-- 2020-02-17
+Magento ignores plugins for \Magento\Framework\Console\Cli:
+	<type name='Magento\Framework\Console\Cli'>
+		<plugin name='Df\Framework\Plugin\Console\Cli' type='Df\Framework\Plugin\Console\Cli'/>
+	</type>
+I use a plugin for \Magento\Cron\Console\Command\CronCommand instead:
+https://github.com/mage2pro/core/blob/6.2.1/Cron/etc/di.xml#L6-L11 -->
+<!-- 2015-10-09
+Цель плагина — отключение автозаполнения полей.
+https://developers.google.com/web/fundamentals/input/form/label-and-name-inputs?hl=en#recommended-input-name-and-autocomplete-attribute-values -->
+	<type name='Magento\Framework\Data\Form\Element\AbstractElement'>
+		<plugin
+			name='Df\Framework\Plugin\Data\Form\Element\AbstractElement'
+			type='Df\Framework\Plugin\Data\Form\Element\AbstractElement'
+		/>
+	</type>
+<!-- 2020-04-16
+"The `_module.less` files of my modules
+should be added to `styles-m.css` and `styles-m.css` (via the `@magento_import` directive)
+after all other `_module.less` files (of all other modules)": https://github.com/mage2pro/core/issues/97 -->
+	<type name='Magento\Framework\Css\PreProcessor\File\FileList\Collator'>
+		<plugin
+			name='Df\Framework\Plugin\Css\PreProcessor\File\FileList\Collator'
+			type='Df\Framework\Plugin\Css\PreProcessor\File\FileList\Collator'
+		/>
+	</type>
+<!-- 2016-08-03
+Начиная с Magento 2.1.0 backend model создаётся только если данные присутствуют в базе данных
+для конкретной области действия настроек (scope и scopeId).
+https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Config/Block/System/Config/Form.php#L309-L327
+Если данные отсутстствуют в БД для конкретной области действия настроек,
+то backend model вообще не создаётся,
+однако данные всё равно извлекаются из БД из общей области действия настроек:
+https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Config/Block/System/Config/Form.php#L323-L327
+Видимо, такое поведение дефектно: данные могут попасть в форму
+в обход обработки и валидации их в backend model.
+
+Ранее (до версии 2.1.0) backend model создавалась в любом случае (такое поведение я считаю более верным):
+https://github.com/magento/magento2/blob/2.0.8/app/code/Magento/Config/Block/System/Config/Form.php#L330-L342
+
+В плагин мы попадаем отсюда: @see \Magento\Config\Block\System\Config\Form::_initElement()
+https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Config/Block/System/Config/Form.php#L347-L367 -->
+	<type name='Magento\Framework\Data\Form\Element\Fieldset'>
+		<plugin name='Df\Framework\Plugin\Data\Form\Element\Fieldset' type='Df\Framework\Plugin\Data\Form\Element\Fieldset'/>
+	</type>
+<!-- 2021-03-26
+1) «Could not save child: "Unknown entity type: Magento\Bundle\Model\Selection\Interceptor requested"»:
+https://github.com/mage2pro/ipay88/issues/17
+2) "«Could not save child: "Unknown entity type: Magento\Bundle\Model\Selection\Interceptor requested"
+on bin/magento product:bundle:resave": https://github.com/canadasatellite-ca/site/issues/44
+3) "Magento 2.2.0 - fails to add bundle product": https://stackoverflow.com/questions/47588206
+4) "Unknown entity type: Magento\Bundle\Model\Selection\Interceptor requested": https://magento.stackexchange.com/questions/260419
+-->
+	<type name='Magento\Framework\EntityManager\TypeResolver'>
+		<plugin name='Df\Framework\Plugin\EntityManager\TypeResolver' type='Df\Framework\Plugin\EntityManager\TypeResolver'/>
+	</type>
+	<type name='Magento\Framework\Logger\Monolog'>
+		<arguments>
+			<argument name='handlers' xsi:type='array'>
+<!-- 2019-10-13
+1) "Disable the logging of «Add of item with id %s was processed» messages to `system.log`":
+https://github.com/kingpalm-com/core/issues/36
+2) @see \Magento\Backend\Model\Menu::add()
+3) It is impossible to write a plugin to any of this:
+\Magento\Framework\Logger\Handler\System
+\Magento\Framework\Logger\Handler\Base
+\Monolog\Handler\AbstractProcessingHandle
+\Psr\Log\LoggerInterface
+It leads to the error: «Circular dependency:
+Magento\Framework\Logger\Monolog depends on Magento\Framework\Cache\InvalidateLogger and vice versa.»
+Magento 2 does not allow to write plugins to «objects that are instantiated before Magento\Framework\Interception is bootstrapped»:
+https://devdocs.magento.com/guides/v2.3/extension-dev-guide/plugins.html#limitations
+2020-02-08
+"The https://github.com/royalwholesalecandy/core/issues/57 solution works with Magento 2.2.5,
+but does not work with Magento 2.3.2.": https://github.com/tradefurniturecompany/core/issues/25#issuecomment-583734975
+2020-02-16
+1) `<item name='debug' xsi:type='object'>Df\Framework\Log\Dispatcher\Debug</item>` does not work for me
+at least in Magento 2.3.2
+2) "Prevent Magento from logging «cache_invalidate» records to `debug.log`":
+https://github.com/tradefurniturecompany/site/issues/43
+2020-08-31 Despite of the name, this handler processes the messages of all levels by default (including exceptions).
+2020-09-07
+In Magento 2.3.5 (dxmoto.com) my `handlers` declaration is not merged with the original one,
+but rewrites it instead (for an unknown reason): https://github.com/magento/magento2/blob/2.3.5-p1/app/etc/di.xml#L253-L262
+Because of it, my `Df\Framework\Log\Dispatcher` handler is the sole one, and all other handlers are discarded:
+	<item name="debug" xsi:type="object">Magento\Framework\Logger\Handler\Debug</item>
+	<item name="syslog" xsi:type="object">Magento\Framework\Logger\Handler\Syslog</item>
+https://github.com/magento/magento2/blob/2.3.5-p1/app/etc/di.xml#L258-L259
+Anyway, I think it is good, because the `debug.log` file is useless,
+and `Magento\Framework\Logger\Handler\Syslog` seems to be useless too. -->
+				<item name='system' xsi:type='object'>Df\Framework\Log\Dispatcher</item>
+			</argument>
+		</arguments>
+	</type>
+<!-- 2018-01-28
+The purpose of this plugin is to provide an ability to my Dfe_Mailgun and Dfe_SMTP modules
+to use an alternative mail transport instead of \Zend\Mail\Transport\Sendmail
+@see \Magento\Email\Model\Transport::__construct():
+	$this->zendTransport = new Sendmail($parameters);
+https://github.com/magento/magento2/blob/1a81e05b/app/code/Magento/Email/Model/Transport.php#L73
+-->
+	<type name='Magento\Framework\Mail\TransportInterfaceFactory'>
+		<plugin
+			name='Df\Framework\Plugin\Mail\TransportInterfaceFactory'
+			type='Df\Framework\Plugin\Mail\TransportInterfaceFactory'
+		/>
+	</type>
+<!-- 2016-05-23 Цель плагина — поддержка df_on_save(). -->
+	<type name='Magento\Framework\Model\AbstractModel'>
+		<plugin name='Df\Framework\Plugin\Model\AbstractModel' type='Df\Framework\Plugin\Model\AbstractModel'/>
+	</type>
+<!-- 2017-07-26
+«bin/magento module:enable»: «The file "/composer.json" doesn't exist»
+https://github.com/mage2pro/stripe/issues/8
+https://mage2.pro/t/4198 -->
+	<preference for='Magento\Framework\Module\PackageInfoFactory' type='Df\Framework\Module\PackageInfoFactory'/>
+<!-- 2017-05-22 -->
+	<type name='Magento\Framework\Reflection\DataObjectProcessor'>
+		<plugin
+			name='Df\Framework\Plugin\Reflection\DataObjectProcessor'
+			type='Df\Framework\Plugin\Reflection\DataObjectProcessor'
+		/>
+	</type>
+<!-- 2017-05-08 Our purpose is to fix the expired session files autocleaning if needed. -->
+	<type name='Magento\Framework\Session\SessionManager'>
+		<plugin name='Df\Framework\Plugin\Session\SessionManager' type='Df\Framework\Plugin\Session\SessionManager'/>
+	</type>
+<!-- 2015-11-20
+Цель плагина — улучшение диагностики отсутствия файлов Less
+«Magento 2 loses the problem Less file name in a «Compilation from source / Cannot read contents from file» error report»:
+https://mage2.pro/t/233 -->
+	<type name='Magento\Framework\View\Asset\Source'>
+		<plugin name='Df\Framework\Plugin\View\Asset\Source' type='Df\Framework\Plugin\View\Asset\Source'/>
+	</type>
+<!--
+2016-11-21 Цель плагина — устранение дефекта метода
+@see \Magento\Framework\View\Element\AbstractBlock::extractModuleName(),
+который работает некорректно (возвращает пустую строку), если класс модуля не имеет префикса «Block»:
+https://github.com/magento/magento2/blob/2.1.2/lib/internal/Magento/Framework/View/Element/AbstractBlock.php#L846-L860
+@see \Magento\Framework\View\Element\AbstractBlock::getModuleName() -->
+	<type name='Magento\Framework\View\Element\AbstractBlock'>
+		<plugin name='Df\Framework\Plugin\View\Element\AbstractBlock' type='Df\Framework\Plugin\View\Element\AbstractBlock'/>
+	</type>
+<!-- 2016-07-28
+Цель плагина — предоставление программистам удобной возможности
+модификации коллекции $result, которая служит источником данных для таблиц.
+
+@see \Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider::getSearchResult()
+https://github.com/magento/magento2/blob/2.1.0/lib/internal/Magento/Framework/View/Element/UiComponent/DataProvider/DataProvider.php#L308-L316
+
+Статьи по теме:
+«How are the rows data retrieved for the backend's orders grid?» https://mage2.pro/t/1907
+«How is @see \Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider::searchResultToOutput() implemented?»
+https://mage2.pro/t/1908
+«How is the «Payment Method» column implemented for the backend's orders grid?»
+https://mage2.pro/t/1906
+
+Обратите внимание, что мы могли вместо плагина перекрыть класс конкретной коллекции, например:
+https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Sales/etc/di.xml#L768
+<type name='Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory'>
+	<arguments>
+		<argument name='collections' xsi:type='array'>
+			<item name='sales_order_grid_data_source' xsi:type='string'
+			>Df\Sales\Model\ResourceModel\Order\Grid\Collection</item>
+		</argument>
+	</arguments>
+</type>
+Однако у такого подхода 2 недостатка:
+1) он неуниверсален и каждую конкретную коллекцию надо перекрывать отдельно.
+2) он хрупок: другие программисты могут захотеть перекрыть ту же коллекцию.
+
+Наш подход намного лучше. -->
+	<type name='Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider'>
+		<plugin
+			name='Df\Framework\Plugin\View\Element\UiComponent\DataProvider\DataProvider'
+			type='Df\Framework\Plugin\View\Element\UiComponent\DataProvider\DataProvider'
+		/>
+	</type>
+<!-- 2015-09-19
+Цель плагина — получение информации о формируемом в данный момент компоненте
+с целью индивидуального языкового перевода его интерфейса. -->
+	<type name='Magento\Framework\View\Layout'>
+		<plugin name='Df\Framework\Plugin\View\Layout' type='Df\Framework\Plugin\View\Layout'/>
+	</type>
+</config>

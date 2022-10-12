@@ -1,0 +1,33 @@
+<?xml version='1.0'?>
+<config
+	xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+	xsi:noNamespaceSchemaLocation='urn:magento:framework:ObjectManager/etc/config.xsd'
+>
+<!-- 2015-12-21
+Цель перекрытия — устранения дефекта:
+«Magento 2 backend incorrectly renders the nested fieldsets: adds nested TR tags with the same id».
+https://mage2.pro/t/330
+Этот дефект приводит к неработоспособности условия <depends> для элемента:
+т.е. видимость элемента перестаёт зависеть от другой опции. -->
+	<type name='Magento\Config\Block\System\Config\Form\Fieldset'>
+		<plugin
+			name='Df\Config\Plugin\Block\System\Config\Form\Fieldset'
+			type='Df\Config\Plugin\Block\System\Config\Form\Fieldset'
+		/>
+	</type>
+<!-- 2015-11-14
+Magento treats `<source_model>` classes as singletons: @see \Magento\Config\Model\Config\SourceFactory::create()
+https://github.com/magento/magento2/blob/2.0.0/app/code/Magento/Config/Model/Config/SourceFactory.php#L33
+The puprose of my plugin to create independent instances of my `<source_model>` classes
+for each `<source_model>` occurence. -->
+	<type name='Magento\Config\Model\Config\SourceFactory'>
+		<plugin name='Df\Config\Plugin\Model\Config\SourceFactory' type='Df\Config\Plugin\Model\Config\SourceFactory'/>
+	</type>
+<!-- 2015-11-14 Цель плагина — алфавитное упорядочивание моих модулей в разделе административных настроек модулей. -->
+	<type name='Magento\Config\Model\Config\Structure\Element\Iterator\Tab'>
+		<plugin
+			name='Df\Config\Plugin\Model\Config\Structure\Element\Iterator\Tab'
+			type='Df\Config\Plugin\Model\Config\Structure\Element\Iterator\Tab'
+		/>
+	</type>
+</config>

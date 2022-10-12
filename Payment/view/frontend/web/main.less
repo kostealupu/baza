@@ -1,0 +1,168 @@
+body.checkout-index-index {
+	.payment-method {
+		.df-debug-message {
+			margin-top: -10px;
+			margin-bottom: 10px;
+			// 2016-08-28 Так у элементов-братьев.
+			@media only screen and (max-width: 767px) {padding-left: 15px;}
+			// 2016-11-09
+			// Используется модулем «Square»,
+			// который таким образом требует загрузки платёжной формы через HTTPS.
+			.df-error {color: red;}
+		}
+	}
+	// 2016-08-17 Донастраиваем интерфейс для наилучшего отображения единственного способа оплаты.
+	&.df-single-payment-method {
+		form.form-login {
+			padding-bottom: 0;
+			border-bottom: 0;
+			margin-bottom: 0;
+			#customer-email-fieldset .field:last-of-type {margin-bottom: 0;}
+		}
+		form#co-payment-form > fieldset {> legend, > br {display: none;}}
+	}
+}
+// 2017-09-09 http://lesscss.org/features/#detached-rulesets-feature
+.df-payment-form-mixin {
+	h3 {margin-top: 0;}
+	// 2017-04-15
+	// Используется в 2-х местах:
+	// 1) «Please select a payment option:»
+	// 2) allPay: «The order will be paid with a bank card.»
+	h4 {margin: 0 0 0.5em 0; font-weight: normal;}
+	// 2016-08-23
+	// Способ оплаты банковской картой.
+	&.df-card {
+		.df-card-new {
+			// 2016-11-12
+			// Поле для ввода имени владельца банковской карты.
+			// Сделал ширину такой же, как в ядре для номера карты.
+			.cardholder .input-text {width: 225px;}
+			// 2016-09-28
+			// Поле для совместного ввода месяца и года истечения срока действия банковской карты.
+			// Используется модулем Square.
+			.date-composite .input-text {width: 5.5em;}
+			// 2018-10-19
+			// "Bootstrap aligns bank card form input labels at center (need at left)":
+			// https://github.com/mage2pro/core/issues/81
+			label {text-align: left;}
+			// 2017-10-17
+			// «Not Outputting the Mixin
+			// If you want to create a mixin but you do not want that mixin to be output,
+			// you can put parentheses after it.»
+			// http://lesscss.org/features/#mixins-feature
+			.placeholder() {color: rgb(194, 194, 194); opacity: 1;}
+			// 2017-10-17
+			// Note 1. https://stackoverflow.com/a/2610741
+			// Note 2.
+			// These rules should not be grouped:
+			// (one invalid selector in a group makes the whole group invalid)
+			// https://stackoverflow.com/a/9705712
+			::-webkit-input-placeholder {.placeholder}
+			:-moz-placeholder {.placeholder}
+			::-moz-placeholder {.placeholder}
+			:-ms-input-placeholder {.placeholder}
+			::-ms-input-placeholder {.placeholder}
+		}
+		// 2017-04-15
+		// В блоке оплаты банковской картой этот стиль используется в 2-х местах:
+		// 1) Выбор банковской карты из числа ранее использованных.
+		// 2) Выбор опции "Новая карта".
+		// @see Df_Payment/card
+		.df-choice {padding-top: 0.25em; padding-bottom: 0.25em;}
+	}
+	.df-choice {> label, > input {cursor: pointer;}}
+	.fieldset.payment:last-child {
+		// 2016-08-28
+		// В ядре margin-bottom: 0, и тогда кнопка «Place Order»
+		// прилипает снизу к форме ввода реквизитов банковской карты.
+		@media only screen and (max-width: 767px) {margin-bottom: 20px;}
+	}
+}
+/**
+ * 2016-08-23
+ * 2017-08-26
+ * It is an internal <form> for a particular payment module:
+ *		<form action="#" method="post" data-bind="
+ *			attr: {class: dfFormCssClassesS()}, afterRender: dfFormAfterRender
+ *		">
+ *			<!--ko if: df.formTemplate -->
+ *				<!-- ko template: df.formTemplate --><!-- /ko -->
+ *			<!--/ko-->
+ *		</form>
+ * https://github.com/mage2pro/core/blob/2.10.42/Payment/view/frontend/web/template/main.html#L42-L48
+ * It is located inside an outer <form> which is common for all payment modules:
+ *		<form id="co-payment-form" class="form payments" novalidate="novalidate">
+ *			<...>
+ *		</form>
+ * https://github.com/magento/magento2/blob/2.2.0-rc2.2/app/code/Magento/Checkout/view/frontend/web/template/payment.html#L18-L39
+ */
+form.df-payment {
+	.df-payment-form-mixin();
+	&.df-placeOrderButtonAlignment-center {
+		& + .payment-method-content {
+			// 2017-04-14
+			// Ядро использует inline-block для больших экранов,
+			// что делает кнопку маленькой и смещённой вправо,
+			// она визуально теряется на фоне ярких логотипов опций оплаты.
+			.actions-toolbar .primary, .actions-toolbar .secondary {
+				display: block;
+				float: none;
+				margin: 1.5em auto 0 auto;
+				max-width: 20em;
+				width: 100%;
+			}
+		}
+	}
+	&.df-placeOrderButtonAlignment-left {
+		& + .payment-method-content {
+			padding-left: 0; // 2017-09-09 It is 22px in Luma.
+			// 2017-04-14
+			// Ядро использует inline-block для больших экранов,
+			// что делает кнопку маленькой и смещённой вправо,
+			// она визуально теряется на фоне ярких логотипов опций оплаты.
+			.actions-toolbar .primary, .actions-toolbar .secondary {
+				display: block;
+				float: none;
+				margin-top: 1.5em;
+				max-width: 20em;
+				width: 100%;
+			}
+		}
+	}
+}
+// 2017-08-26
+// It is for the multishipping scenario.
+// @see \Dfe\Stripe\Block\Multishipping::_toHtml():
+// 	['class' => df_cc_s('df-payment', df_module_name_lc($m, '-'))]
+// https://github.com/mage2pro/stripe/blob/1.10.8/Block/Multishipping.php#L36
+form.multicheckout .df-payment {
+	.df-payment-form-mixin();
+	// 2017-08-27
+	// It is the same values as for Blank / Luma:
+	// 		@checkout-payment-method-content__padding__xl: 22px;
+	// https://github.com/magento/magento2/blob/2.2.0-rc2.2/app/design/frontend/Magento/blank/Magento_Checkout/web/css/source/module/checkout/_payments.less#L14
+	// https://github.com/magento/magento2/blob/2.2.0-rc2.2/app/design/frontend/Magento/luma/Magento_Checkout/web/css/source/module/checkout/_payments.less#L14
+	padding-left: 22px;
+}
+@import 'less/withOptions';
+// 2016-11-19
+// IWD «Checkout Suite» норовит поломать платёжную форму посредством :before.
+// http://stackoverflow.com/a/18736074
+// Другие дефекты IWD «Checkout Suite»: https://mage2.pro/tags/iwd-checkout-suite
+.iwd-opc-form-for-payments .fieldset .opc-payment .payment-method._active > .payment-method-content > form.form.df-payment fieldset {
+	> div.number, > div.cvv {> label:before {content: none;}}
+}
+// 2018-12-20 for staging.mineralair.com
+.df-card-new {
+	> .field .fields.group .field {float: left;}
+	.control {
+		margin: 0 !important;
+		ul.credit-card-types > li {
+			letter-spacing: normal;
+			line-height: 20px;
+			padding: 0;
+			width: auto;
+		}
+	}
+}

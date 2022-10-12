@@ -1,0 +1,23 @@
+body {&.checkout-index-index, &.multishipping-checkout-billing {
+	// 2016-08-07
+	// Today I have noticed that radio buttons and their labels
+	// are not properly aligned vertically on the checkout page.
+	// It seems to be a core bug.
+	.choice
+	// 2017-08-26 It is for multishipping. It does not affect `checkout-index-index`.
+	,#payment-methods > .item-title {
+		> input[type=radio], > label {vertical-align: middle;  margin-top: 0;}
+		> input[name=billing-address-same-as-shipping] {vertical-align: sub;}
+	}
+	// 2016-08-21
+	.messages pre {
+		white-space: pre-wrap; // 2016-08-21 I use it to wrap long texts: http://stackoverflow.com/a/1634298
+		word-wrap: break-word;
+		max-width: 57em; // 2016-08-21 I have not found another way to limit the width.
+	}
+}}
+// 2017-08-26 It is just a hack. The normal `margin-right` is 5px.
+body.multishipping-checkout-billing {
+	.item-title {> label, > input {cursor: pointer;}}
+	.df-payment {input[type=radio] {margin-right: 6px;}}
+}

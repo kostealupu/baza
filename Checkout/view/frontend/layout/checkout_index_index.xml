@@ -1,0 +1,37 @@
+<?xml version='1.0'?>
+<page
+	layout='checkout'
+	xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+	xsi:noNamespaceSchemaLocation='urn:magento:framework:View/Layout/etc/page_configuration.xsd'
+>
+	<head><css src='Df_Checkout::index.css'/></head>
+	<body>
+<!-- 2016-07-14 By analogy with https://github.com/magento/magento2/blob/2.1.0/app/code/Magento/Checkout/view/frontend/layout/default.xml#L13-L15
+-->
+		<referenceBlock name='head.components'>
+<!-- 2019-06-02
+Previously I set some names to these blocks, e.g.: `name='df_checkout_messages'`,
+but it seems that I do not need these names at all. -->
+			<block class='Df\Checkout\B\Messages'/>
+			<block class='Df\Checkout\B\Payment'/>
+		</referenceBlock>
+		<referenceBlock name='checkout.root'>
+			<arguments>
+				<argument name='jsLayout' xsi:type='array'>
+					<item name='components' xsi:type='array'>
+						<item name='checkout' xsi:type='array'>
+							<item name='children' xsi:type='array'>
+								<item name='errors' xsi:type='array'>
+									<item name='component' xsi:type='string'>Magento_Ui/js/view/messages</item>
+									<item name='config' xsi:type='array'>
+										<item name='template' xsi:type='string'>Df_Checkout/messages</item>
+									</item>
+								</item>
+							</item>
+						</item>
+					</item>
+				</argument>
+			</arguments>
+		</referenceBlock>
+	</body>
+</page>

@@ -1,0 +1,151 @@
+.df-config .accordion
+// 2020-01-22
+// It is used for my modules outside the `Mage2.PRO` section.
+// The `.df-config` style can be set set by the `<fieldset_css>df-config</fieldset_css>` rule.
+,.accordion .section-config.df-config {
+	// 2017-04-23
+	// Расстояние между заголовком группы и блоком ниже.
+	// В оригинале: 1.9rem.
+	// Оно меня устраивало, пока я не использовал для групп комментарии.
+	// Комментарии к группе получаются слишком оторванными от заголовка группы,
+	// поэтому уменьшил это расстояние.
+	// Приставка «.section-config» нужна лишь для того, чтобы побороть правило ядра.
+	// Окончание «.open» добавляем, чтобы наше правило действовало только для раскрытых групп.
+	// Для свёрнутых групп нам это правило вредит,
+	// потому что ниже заголовка свёрнутой группы расположена горизонтальная линия-разделитель,
+	// и она хорошо смотрится именно при стандартном отступе 1.9rem.
+	.entry-edit-head {> a.open {padding-bottom: 0.3rem;}}
+	fieldset.config {
+		// 2016-01-11
+		// Мы используем .addbefore только для невидимых элементов: стилей и скриптов.
+		// Однако это всё равно почему-то приводит к наличию у таких элементов высоты,
+		// поэтому делаем их невидимыми явно.
+		.addbefore {display: none;}
+		// 2016-03-09
+		// В ядре: 100px
+		// https://github.com/magento/magento2/blob/487f5f45/app/design/adminhtml/Magento/backend/web/css/styles-old.less#L855
+		.admin__scope-old textarea {min-height: auto;}
+		// 2016-06-30
+		ul.df-enabler-warnings {border: 1px solid red; font-size: 12px; list-style-type: none; padding: 2px 4px;}
+		// 2015-12-28
+		// Ядро по клику на подписи к галке уже умеет устанавливать и снимать эту галку.
+		// Мы же в дополнение к этому устанавливаем правильный курсор — руку,
+		// чтобы администратору было понятно, что на надпись можно кликнуть.
+		input.df-checkbox ~ label {cursor: pointer;}
+		// 2016-08-01 Этот код выравнивает надпись и элемент управления вертикально по верхнему краю.
+		> table > tbody > tr > td {
+			&.label > label {
+				display: block;
+				// 2015-12-28
+				// У этого label во всех версиях Magento padding-top: 7px
+				// https://github.com/magento/magento2/blob/2.0.0/app/design/adminhtml/Magento/backend/Magento_Backend/web/css/source/module/main/_collapsible-blocks.less#L330
+				// https://github.com/magento/magento2/blob/2.1.0/app/design/adminhtml/Magento/backend/Magento_Backend/web/css/source/module/main/_collapsible-blocks.less#L410
+				// Поэтому и нам такой нужен.
+				padding-top: 0;
+			}
+			// 2016-08-01
+			// Заметил, что у моего fieldset (сложного элемента управления)
+			// почему-то стоит значение content-box, унаследованное от элементов верхнего уровня.
+			&.value > * {box-sizing: border-box;}
+		}
+		// 2016-07-01 Комментарий к модулю целиком
+		> .comment {margin-bottom: 0; margin-top: 0;}
+		// 2015-12-28
+		// https://github.com/mage2pro/core/tree/dd5ad387ad8b27f748d64a8b6224cc0956f98177/Config/view/adminhtml/web/main.js#L74
+		.label label.df-label-checkbox {padding-top: 0;}
+		.value {vertical-align: top;}
+		// 2016-01-29
+		select.df-dropdown-number {width: 3em;}
+		// 2016-05-30 @see \Df\Framework\Form\Element\Url
+		td.value > div.df-url {margin-top: 7px;}
+	}
+}
+.df-config .accordion .section-config
+// 2020-01-22
+// It is used for my modules outside the `Mage2.PRO` section.
+// The `.df-config` style can be set set by the `<fieldset_css>df-config</fieldset_css>` rule.
+,.accordion .section-config.df-config {
+	// 2016-05-30
+	// Когда одна группа настроек вложена в другую группу,
+	// то элементы управления вложенной группы смещены
+	// относительно элементов управления родительской группы.
+	// Мне же захотелось, чтобы все элементы управления моих модулей
+	// были выровнены по левому краю.
+	// Поэтому я смещаю только заголовок дочерней группы
+	// относительно заголовка родительской группы.
+	.section-config {
+		// 2017-04-23
+		fieldset > div.comment {font-size: 12px;}
+		// 2016-05-30 Убираем смещение дочерней группы. В оригинале: 4rem.
+		margin-left: 0px;
+		// 2016-05-30 Добавляем смещение заголовка дочерней группы. В оригинале: 0.
+		> .entry-edit-head {margin-left: 4rem;}
+		// 2017-04-23 Комментарий для группы также смещаем вправо.
+		> fieldset > div.comment {margin-left: 4rem;}
+		// 2016-06-02 Третий уровень вложенности групп.
+		.section-config  {
+			> .entry-edit-head {margin-left: 8rem;}
+			// 2017-04-23 Комментарий для группы также смещаем вправо.
+			> fieldset > div.comment {margin-left: 8rem;}
+		}
+	}
+}
+// 2017-06-19
+// Отныне .df-note используется не только для моих модулей, но и при русификации стандартных,
+// поэтому вынес эти правила за пределы .df-config.
+.accordion .config {
+	// 2016-05-13
+	// Примечание к настроечному полю размещается внутри p.note.
+	// Однако блочные элементы (в том числе ul) не могут быть расположены внутри p,
+	// и браузер выносит из за p.
+	// Получается, что стандартные стили для примечания
+	// к расположенным внутри примечания блочным элементами не применяются.
+	// Поэтому мы описываем из здесь вручную.
+	.df-note {
+		font-size: 12px; color: #303030;
+		// 2017-11-06
+		// I use it to overcome the following M2 core rules:
+		// .accordion .config .comment a, .accordion .config .link-more {
+		// 		font-size: 1.4rem; font-weight: 400;
+		// }
+		a {font-size: inherit !important; font-weight: inherit !important;}
+	}
+	// 2016-05-13
+	// К сожалению, синтаксис с аперсандом справа почему-то не поддерживается компилятором Less,
+	// используемым Magento 2.
+	// http://blog.slaks.net/2013-09-29/less-css-secrets-of-the-ampersand/#filtering-a-nested-selector-to-only-match-certain-elements
+	ul.df-note, ol.df-note, .df-note ul, .df-note ol {
+		// 2016-11-24
+		// Раньше здесь стояло «list-style-position: inside;»
+		// Однако браузер Google Chrome, начиная с версии 53,
+		// а также последние версии Opera и Яндекс.Браузер
+		// стали добавлять неявный и неотключаемый left padding размером 1em
+		// между значком элемента списка (у меня — «square», см. ниже) и текстом элемента списка,
+		// причём сотрудники Google считают это правильным:
+		// https://bugs.chromium.org/p/chromium/issues/detail?id=644630#c4
+		// http://stackoverflow.com/questions/39363319
+		// Так же себя ведут Internet Explorer 11 и Edge.
+		// Firefox же так себя не ведёт, поэтому наивные решения типа
+		// обёртки текста элемента списка в <span> с правилами position: relative; margin-left: -1em;
+		// приведут к неправильному отображению в Firefox.
+		// Решение получше взял отсюда: http://stackoverflow.com/a/39363780
+		// Оно успешно работает и в Chrome, и в Firefox.
+		list-style-position: outside;
+		> li {margin: 0.2em 0 0.2em 1em;}
+	}
+	ul.df-note, .df-note ul {list-style-type: square;}
+	// 2016-01-30
+	table.df-note, .df-note table {
+		width: auto;
+		td {border: 1px solid #e3e3e3; padding: 0.25em 0.5em; vertical-align: middle;}
+		tr td:first-child {font-weight: bold;}
+		tr:nth-child(even) {background-color: #f5f5f5;}
+	}
+	// 2015-04-20
+	// Этим стилем в длинном тексте примечания к настроечной опции или блоку
+	// выделяется самая главная мысль рекомендации.
+	// 2017-06-29 @used-by \Dfe\Dynamics365\Button::getCommentText()
+	.df-ok, .df-recommendation {color: green; font-weight: bold;}
+	// 2017-06-29 @used-by \Dfe\Dynamics365\Button::getCommentText()
+	.df-warning {color: red; font-weight: bold;}
+}
