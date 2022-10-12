@@ -1,20 +1,11 @@
 {
-	"name": "kostealupu/core"
-	,"version": "8.0.9"
-	,"description": "maib core package."
+	"name": "kostealupu/baza"
+	,"version": "1.0.0"
+	,"description": "core package."
 	,"type": "magento2-module"
-	,"homepage": "https://maib.md"
 	,"license": "MIT"
-	,"authors": [{
-		"name": "maib"
-		,"email": "ecom@maib.md"
-		,"homepage": "https://maib.md"
-		,"role": "Developer"
-	}]
 	,"require": {
-		"zendframework/zend-filter": "*"
-		,"zendframework/zend-stdlib": "*"
-		,"magento/framework": ">=100.0.0"
+		"magento/framework": ">=100.0.0"
 		,"magento/module-sample-data": ">=100.0.0"
 		,"phpunit/phpunit": "*"
 	}
