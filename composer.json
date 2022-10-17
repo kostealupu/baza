@@ -4,11 +4,6 @@
 	,"description": "core package."
 	,"type": "magento2-module"
 	,"license": "MIT"
-		,"config": {
-    "github-oauth": {
-        "github.com": "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"
-    }
-}
 	,"require": {
 		"magento/framework": ">=100.0.0"
 		,"magento/module-sample-data": ">=100.0.0"
